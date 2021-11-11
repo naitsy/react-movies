@@ -48,5 +48,5 @@ export function App(){
 //   );
 // }
 
-//hacer "publica" el componente
+//hacer "publico" el componente
 //export default App;
