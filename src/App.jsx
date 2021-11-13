@@ -11,9 +11,6 @@ export function App(){
       <div>
         <header>
           <h1 className={styles.title}>Movies</h1>
-
-
-
         </header>
         <main>
           <Switch>
