@@ -4,36 +4,42 @@ import styles from './MoviesGrid.module.css';
 import { useEffect, useState } from 'react';
 import { get } from '../utils/httpClient';
 import { Spinner } from './spinner';
-import { useQuery } from '../utils/hooks';
+import InfiniteScroll from 'react-infinite-scroll-component';
 
-
-export function MoviesGrid(){
+export function MoviesGrid( {search} ){
     const [movies, setMovies] = useState([]);
-    const [isLoading, setIsLoading ] = useState(true);   
-
-    const query = useQuery();
-    const search = query.get("search");
+    const [isLoading, setIsLoading ] = useState(true);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
 
     // useEffect -> efecto secundario, se ejecuta despues del render del componente
     useEffect(() => {
-        const url = search ? "/search/movie?query="+ search : "/discover/movie";
+        // debugger;
+        const url = search ? "/search/movie?query="+ search +"&page="+ page : "/discover/movie?page="+ page;
 
         get(url).then((data)=>{
-            setMovies(data.results);
+            setMovies((_prev) => _prev.concat(data.results));
+            setHasMore( data.total_pages > page );
             setIsLoading(false);
         })
 
-    }, [search]);
+    }, [search, page]);
 
-    if(isLoading)return <Spinner />
+    //if(isLoading)return <Spinner />
 
     return (
-        <ul className={ styles.moviesGrid } >
-            {
-                movies.map((movie) => {
-                    return <MovieCard key = {movie.id} movie = {movie} />
-                })
-            }
-        </ul>
+        <InfiniteScroll
+            dataLength={movies.length} 
+            next={ () => setPage((_prev) => _prev + 1) }
+            hasMore={ hasMore } 
+            loader={<Spinner />}>
+            <ul className={ styles.moviesGrid } >
+                {
+                    movies.map((movie) => {
+                        return <MovieCard key = {movie.id} movie = {movie} />
+                    })
+                }
+            </ul>
+        </InfiniteScroll>
     )
 }
